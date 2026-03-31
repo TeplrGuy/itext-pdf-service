@@ -113,11 +113,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Get Azure access token for Playwright
+        id: az-token
+        run: echo "token=$(az account get-access-token --resource https://management.azure.com --query accessToken -o tsv)" >> $GITHUB_OUTPUT
+
       - name: Run Playwright tests in Azure Playwright Workspace
         working-directory: e2e
         run: npx playwright test --config=playwright.service.config.ts --workers=20
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+          PLAYWRIGHT_SERVICE_ACCESS_TOKEN: ${{ steps.az-token.outputs.token }}
           BASE_URL: ${{ env.APP_URL }}
           CI: true
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
