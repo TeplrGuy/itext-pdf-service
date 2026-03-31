@@ -14,24 +14,16 @@
  */
 import { defineConfig } from '@playwright/test';
 import { createAzurePlaywrightConfig, ServiceAuth } from '@azure/playwright';
-import { AzureCliCredential } from '@azure/identity';
 import baseConfig from './playwright.config';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Use access token if available (CI), otherwise AzureCliCredential (local dev)
-const serviceConfig = process.env.PLAYWRIGHT_SERVICE_ACCESS_TOKEN
-  ? createAzurePlaywrightConfig({
-      serviceAuthType: ServiceAuth.ACCESS_TOKEN,
-    })
-  : createAzurePlaywrightConfig({
-      credential: new AzureCliCredential(),
-    });
-
 export default defineConfig(
   baseConfig,
-  serviceConfig,
+  createAzurePlaywrightConfig({
+    serviceAuthType: ServiceAuth.ACCESS_TOKEN,
+  }),
   {
     workers: 20,
     use: {
