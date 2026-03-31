@@ -1,0 +1,14 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.DotSettings.user
+output/
+*.pdf
+# iText license - do not commit
+**/itext-license.json
+# playwright-cli session data
+.playwright-cli/
+before-generate.png
+after-generate.png

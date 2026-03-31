@@ -1,0 +1,199 @@
+﻿@page "/"
+@using ITextPdfService.Abstractions
+@using ITextPdfService.Models
+@inject IPdfGenerator PdfGenerator
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Tax Statement Generator</PageTitle>
+
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">Tax Statement Generator</h1>
+        <p class="lead text-muted">Generate professional tax statement PDFs powered by iText</p>
+    </div>
+
+    <EditForm Model="statement" OnValidSubmit="GeneratePdf" FormName="taxForm">
+        <DataAnnotationsValidator />
+
+        <div class="row g-4">
+            <!-- Taxpayer Information -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>Taxpayer Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <InputText @bind-Value="statement.TaxpayerInfo.Name" class="form-control" placeholder="e.g. John Smith" />
+                            <ValidationMessage For="() => statement.TaxpayerInfo.Name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">SSN (Last 4 Digits)</label>
+                            <InputText @bind-Value="statement.TaxpayerInfo.SsnLast4" class="form-control" placeholder="e.g. 1234" maxlength="4" />
+                            <ValidationMessage For="() => statement.TaxpayerInfo.SsnLast4" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tax Year</label>
+                            <InputNumber @bind-Value="statement.TaxpayerInfo.TaxYear" class="form-control" />
+                            <ValidationMessage For="() => statement.TaxpayerInfo.TaxYear" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Organization Name</label>
+                            <InputText @bind-Value="statement.OrganizationName" class="form-control" />
+                            <ValidationMessage For="() => statement.OrganizationName" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Sources -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Income Sources</h5>
+                        <button type="button" class="btn btn-sm btn-light" @onclick="AddIncomeItem">+ Add Source</button>
+                    </div>
+                    <div class="card-body">
+                        @for (int i = 0; i < statement.IncomeItems.Count; i++)
+                        {
+                            var index = i;
+                            <div class="row g-2 mb-3 align-items-end">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Source</label>
+                                    <InputText @bind-Value="statement.IncomeItems[index].Description" class="form-control form-control-sm" placeholder="e.g. W-2 Wages" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label small fw-semibold">Amount ($)</label>
+                                    <InputNumber @bind-Value="statement.IncomeItems[index].Amount" class="form-control form-control-sm" />
+                                </div>
+                                <div class="col-2">
+                                    @if (statement.IncomeItems.Count > 1)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100" @onclick="() => RemoveIncomeItem(index)">✕</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <hr />
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Total Deductions ($)</label>
+                            <InputNumber @bind-Value="statement.TotalDeductions" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary & Generate -->
+        <div class="row mt-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow border-primary">
+                    <div class="card-body text-center py-4">
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <div class="text-muted small">Total Income</div>
+                                <div class="fs-5 fw-bold text-success">@statement.TotalIncome.ToString("C2")</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-muted small">Deductions</div>
+                                <div class="fs-5 fw-bold text-warning">@statement.TotalDeductions.ToString("C2")</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-muted small">@(statement.NetTaxOwed >= 0 ? "Net Tax Owed" : "Refund Due")</div>
+                                <div class="fs-5 fw-bold @(statement.NetTaxOwed >= 0 ? "text-danger" : "text-success")">@Math.Abs(statement.NetTaxOwed).ToString("C2")</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg px-5" disabled="@isGenerating">
+                            @if (isGenerating)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Generating...</span>
+                            }
+                            else
+                            {
+                                <span>📄 Generate Tax Statement PDF</span>
+                            }
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessage</div>
+                        }
+
+                        @if (isGenerated)
+                        {
+                            <div class="alert alert-success mt-3">
+                                ✅ PDF generated successfully! The download should start automatically.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private TaxStatement statement = new()
+    {
+        TaxpayerInfo = new TaxpayerInfo
+        {
+            Name = "Sarah Johnson",
+            SsnLast4 = "4567",
+            TaxYear = 2025
+        },
+        OrganizationName = "Contoso Financial Services",
+        IncomeItems =
+        [
+            new IncomeItem { Description = "W-2 Wages — Contoso Ltd", Amount = 85000.00m },
+            new IncomeItem { Description = "Freelance Consulting", Amount = 12500.00m },
+            new IncomeItem { Description = "Investment Dividends", Amount = 3200.00m }
+        ],
+        TotalDeductions = 14500.00m
+    };
+
+    private bool isGenerating;
+    private bool isGenerated;
+    private string? errorMessage;
+
+    private void AddIncomeItem()
+    {
+        statement.IncomeItems.Add(new IncomeItem());
+    }
+
+    private void RemoveIncomeItem(int index)
+    {
+        if (statement.IncomeItems.Count > 1)
+            statement.IncomeItems.RemoveAt(index);
+    }
+
+    private async Task GeneratePdf()
+    {
+        isGenerating = true;
+        isGenerated = false;
+        errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var pdfBytes = await PdfGenerator.GenerateAsync(statement);
+            var fileName = $"TaxStatement_{statement.TaxpayerInfo.TaxYear}_{statement.TaxpayerInfo.Name.Replace(" ", "_")}.pdf";
+
+            // Trigger browser download
+            await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes));
+            isGenerated = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error generating PDF: {ex.Message}";
+        }
+        finally
+        {
+            isGenerating = false;
+        }
+    }
+}
