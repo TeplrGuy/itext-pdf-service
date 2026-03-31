@@ -14,7 +14,7 @@
  */
 import { defineConfig } from '@playwright/test';
 import { createAzurePlaywrightConfig } from '@azure/playwright';
-import { DefaultAzureCredential } from '@azure/identity';
+import { AzureCliCredential } from '@azure/identity';
 import baseConfig from './playwright.config';
 import dotenv from 'dotenv';
 
@@ -23,7 +23,7 @@ dotenv.config();
 export default defineConfig(
   baseConfig,
   createAzurePlaywrightConfig({
-    credential: new DefaultAzureCredential(),
+    credential: new AzureCliCredential(),
   }),
   {
     workers: 20,
