@@ -1,3 +1,4 @@
+using System.Globalization;
 using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
 using iText.Kernel.Font;
@@ -158,7 +159,7 @@ public class ITextTaxStatementGenerator : IPdfGenerator
                 .SetPadding(6)
                 .SetBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f)));
             table.AddCell(new Cell()
-                .Add(new Paragraph(item.Amount.ToString("C2")).SetFontSize(10)
+                .Add(new Paragraph(item.Amount.ToString("C2", CultureInfo.GetCultureInfo("en-US"))).SetFontSize(10)
                     .SetTextAlignment(TextAlignment.RIGHT))
                 .SetBackgroundColor(bgColor)
                 .SetPadding(6)
@@ -176,7 +177,7 @@ public class ITextTaxStatementGenerator : IPdfGenerator
             .SetBorderLeft(Border.NO_BORDER)
             .SetBorderRight(Border.NO_BORDER));
         table.AddCell(new Cell()
-            .Add(new Paragraph(statement.TotalIncome.ToString("C2")).SetFont(boldFont).SetFontSize(10)
+            .Add(new Paragraph(statement.TotalIncome.ToString("C2", CultureInfo.GetCultureInfo("en-US"))).SetFont(boldFont).SetFontSize(10)
                 .SetTextAlignment(TextAlignment.RIGHT))
             .SetPadding(8)
             .SetBorderTop(new SolidBorder(HeaderBlue, 1.5f))
@@ -199,8 +200,8 @@ public class ITextTaxStatementGenerator : IPdfGenerator
 
         var summaryTable = new Table(new float[] { 350, 150 }).UseAllAvailableWidth();
 
-        AddSummaryRow(summaryTable, "Total Income:", statement.TotalIncome.ToString("C2"), false, boldFont);
-        AddSummaryRow(summaryTable, "Total Deductions:", $"({statement.TotalDeductions.ToString("C2")})", false, boldFont);
+        AddSummaryRow(summaryTable, "Total Income:", statement.TotalIncome.ToString("C2", CultureInfo.GetCultureInfo("en-US")), false, boldFont);
+        AddSummaryRow(summaryTable, "Total Deductions:", $"({statement.TotalDeductions.ToString("C2", CultureInfo.GetCultureInfo("en-US"))})", false, boldFont);
 
         // Net owed - highlighted
         summaryTable.AddCell(new Cell()
@@ -212,7 +213,7 @@ public class ITextTaxStatementGenerator : IPdfGenerator
             .SetBorderLeft(Border.NO_BORDER)
             .SetBorderRight(Border.NO_BORDER));
         summaryTable.AddCell(new Cell()
-            .Add(new Paragraph(Math.Abs(statement.NetTaxOwed).ToString("C2"))
+            .Add(new Paragraph(Math.Abs(statement.NetTaxOwed).ToString("C2", CultureInfo.GetCultureInfo("en-US")))
                 .SetFont(boldFont).SetFontSize(12).SetFontColor(HeaderBlue)
                 .SetTextAlignment(TextAlignment.RIGHT))
             .SetPadding(10)
