@@ -38,10 +38,11 @@ test.describe('Tax Statement Generator', () => {
 
   test.describe('Form Interaction', () => {
     test('should allow editing taxpayer name', async ({ page }) => {
-      await taxPage.fullNameInput.fill('Test User');
+      await taxPage.fullNameInput.click();
+      await taxPage.fullNameInput.press('Control+a');
+      await taxPage.fullNameInput.pressSequentially('Test User', { delay: 30 });
       await taxPage.ssnInput.click(); // blur to commit
-      await page.waitForTimeout(300);
-      await expect(taxPage.fullNameInput).toHaveValue('Test User');
+      await expect(taxPage.fullNameInput).toHaveValue('Test User', { timeout: 10000 });
     });
 
     test('should allow editing tax year', async ({ page }) => {
@@ -54,27 +55,27 @@ test.describe('Tax Statement Generator', () => {
       await expect(yearInput).toHaveValue('2024');
     });
 
-    test('should add a new income source row', async () => {
-      const beforeCount = await taxPage.page.getByRole('textbox', { name: 'e.g. W-2 Wages' }).count();
+    test('should add a new income source row', async ({ page }) => {
+      const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
+      const beforeCount = await sourceInputs.count();
       await taxPage.addSourceButton.click();
-      const afterCount = await taxPage.page.getByRole('textbox', { name: 'e.g. W-2 Wages' }).count();
-      expect(afterCount).toBe(beforeCount + 1);
+      // Wait for Blazor Server to re-render the new row
+      await expect(sourceInputs).toHaveCount(beforeCount + 1, { timeout: 10000 });
     });
 
     test('should remove an income source row', async ({ page }) => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
       const beforeCount = await sourceInputs.count();
       await taxPage.getRemoveButton(0).click();
-      await page.waitForTimeout(500); // wait for Blazor re-render
-      const afterCount = await sourceInputs.count();
-      expect(afterCount).toBe(beforeCount - 1);
+      // Wait for Blazor Server to re-render after removal
+      await expect(sourceInputs).toHaveCount(beforeCount - 1, { timeout: 10000 });
     });
 
     test('should update summary totals when income changes', async ({ page }) => {
       // Clear all but one income row
       while (await page.getByRole('button', { name: '✕' }).count() > 1) {
         await page.getByRole('button', { name: '✕' }).first().click();
-        await page.waitForTimeout(300);
+        await page.waitForTimeout(500);
       }
       // Fill the remaining row with a known value
       await taxPage.getIncomeSourceInput(0).fill('Test Income');
@@ -82,10 +83,9 @@ test.describe('Tax Statement Generator', () => {
 
       // Click elsewhere to trigger Blazor binding
       await taxPage.fullNameInput.click();
-      await page.waitForTimeout(500);
 
-      // The summary should show the new total
-      await expect(page.getByText('$50,000.00')).toBeVisible();
+      // Use auto-retrying assertion (Blazor Server needs time to recalculate)
+      await expect(page.getByText('$50,000.00')).toBeVisible({ timeout: 10000 });
     });
   });
 
