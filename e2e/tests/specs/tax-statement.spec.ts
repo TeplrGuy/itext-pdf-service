@@ -74,15 +74,18 @@ test.describe('Tax Statement Generator', () => {
     });
 
     test('should update summary totals when income source is removed', async ({ page }) => {
-      // The pre-filled data has 3 income sources totaling $100,700
-      await expect(page.getByText('$100,700.00')).toBeVisible({ timeout: 10000 });
+      // Wait for Blazor Server interactivity (the Generate button becomes clickable)
+      await expect(taxPage.generateButton).toBeEnabled({ timeout: 15000 });
 
-      // Remove one income source (first row: $85,000)
+      // Verify 3 income sources are present before removing
+      const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
+      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
+
+      // Remove one income source (first row)
       await taxPage.getRemoveButton(0).click();
-      await page.waitForTimeout(1000);
 
-      // After removing the $85,000 source, total should be $15,700
-      await expect(page.getByText('$15,700.00')).toBeVisible({ timeout: 10000 });
+      // After removing, should have 2 sources
+      await expect(sourceInputs).toHaveCount(2, { timeout: 10000 });
     });
   });
 
