@@ -86,7 +86,8 @@ jobs:
           path: e2e/test-results/
           retention-days: 14
 
-  load-test:
+  playwright-cloud:
+    name: Playwright Workspace (Cloud)
     needs: e2e-tests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -97,6 +98,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: e2e
+        run: npm ci
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -104,13 +113,18 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Run Azure Load Test
-        uses: azure/load-testing@v1
+      - name: Run Playwright tests in Azure Playwright Workspace
+        working-directory: e2e
+        run: npx playwright test --config=playwright.service.config.ts --workers=20
+        env:
+          PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+          BASE_URL: ${{ env.APP_URL }}
+          CI: true
+
+      - name: Upload cloud test report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          loadTestConfigFile: azure-load-test.yml
-          loadTestResource: alt-itext-pdf-demo
-          resourceGroup: rg-itext-pdf-demo
-          env: |
-            [
-              { "name": "BASE_URL", "value": "${{ env.APP_URL }}" }
-            ]
+          name: playwright-cloud-report
+          path: e2e/playwright-report/
+          retention-days: 14

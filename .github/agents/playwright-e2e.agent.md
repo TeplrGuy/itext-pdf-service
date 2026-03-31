@@ -1,5 +1,5 @@
 ---
-description: "Generate Playwright E2E test suites for CI/CD pipelines and Azure Load Testing. Reads playwright-cli snapshots and generated code to create Page Object Models, test specs, GitHub Actions workflows, and Azure Load Testing config."
+description: "Generate Playwright E2E test suites that run locally, in CI/CD pipelines, and in Azure Playwright Workspaces (cloud-hosted browsers). Reads playwright-cli snapshots to create Page Object Models, test specs, playwright.service.config.ts for cloud execution, and GitHub Actions workflows."
 ---
 
 ## User Input
@@ -68,12 +68,18 @@ For each user flow:
 3. Include artifact uploads for reports, traces, and screenshots
 4. Add JUnit reporter output for test result parsing
 
-### Phase 6: Azure Load Testing (if requested)
+### Phase 6: Azure Playwright Workspaces (Cloud Execution)
 
-1. Generate `azure-load-test.yml` configuration
-2. Include failure criteria thresholds
-3. Document the `az load test create` command
-4. Set up environment variables for target URL
+Move the same tests from local browsers to Azure-hosted cloud browsers:
+
+1. Install `@azure/playwright` and `dotenv` in the e2e project
+2. Generate `playwright.service.config.ts` that extends the base config and connects to Azure Playwright Workspaces via `getServiceConfig()`
+3. Create `.env` file with `PLAYWRIGHT_SERVICE_URL` placeholder
+4. Update GitHub Actions workflow to include a cloud test job:
+   - Uses OIDC authentication (`azure/login@v2`)
+   - Runs `npx playwright test --config=playwright.service.config.ts --workers=20`
+   - `PLAYWRIGHT_SERVICE_URL` from GitHub secret
+5. Document: local tests use `playwright.config.ts` (local browsers), cloud tests use `playwright.service.config.ts` (Azure browsers)
 
 ### Phase 7: Validation
 
@@ -89,6 +95,7 @@ Report to the user:
 - Number of Page Object Models created
 - Number of test specs and individual tests
 - GitHub Actions workflow path
-- Azure Load Testing config path (if generated)
 - Command to run tests locally: `cd e2e && npx playwright test`
+- Command to run in Azure cloud: `cd e2e && npx playwright test --config=playwright.service.config.ts`
 - Command to run with UI: `cd e2e && npx playwright test --ui`
+- Next step: Create Playwright Workspace in Azure Portal and set `PLAYWRIGHT_SERVICE_URL` secret

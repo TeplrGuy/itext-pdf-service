@@ -12,3 +12,9 @@ output/
 .playwright-cli/
 before-generate.png
 after-generate.png
+# Playwright test artifacts
+e2e/test-results/
+e2e/playwright-report/
+e2e/.env
+publish/
+publish.zip

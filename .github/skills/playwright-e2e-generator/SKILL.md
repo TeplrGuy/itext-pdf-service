@@ -1,6 +1,6 @@
 ---
 name: playwright-e2e-generator
-description: "Generate Playwright E2E test scripts for CI/CD pipelines and Azure Load Testing. Use when: creating end-to-end tests, generating Playwright test files, setting up CI/CD test pipelines, configuring Azure Load Testing with Playwright, writing automated UI tests, creating test suites for deployment gates."
+description: "Generate Playwright E2E test scripts that run locally and in Azure Playwright Workspaces (cloud-hosted browsers). Use when: creating end-to-end tests, generating Playwright test files, setting up CI/CD test pipelines, moving local Playwright tests to Azure cloud browsers, writing automated UI tests, creating test suites for deployment gates."
 ---
 
 # Playwright E2E Test Generator
@@ -366,5 +366,5 @@ az load test create \
 ## Specific References
 
 * **Page Object Model patterns** [references/page-object-model.md](references/page-object-model.md)
-* **Azure Load Testing setup** [references/azure-load-testing.md](references/azure-load-testing.md)
+* **Azure Playwright Workspaces** [references/azure-playwright-workspaces.md](references/azure-playwright-workspaces.md)
 * **CI/CD pipeline patterns** [references/cicd-patterns.md](references/cicd-patterns.md)

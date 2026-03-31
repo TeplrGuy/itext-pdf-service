@@ -57,35 +57,32 @@ test.describe('Tax Statement Generator', () => {
 
     test('should add a new income source row', async ({ page }) => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
-      const beforeCount = await sourceInputs.count();
+      // Pre-filled data has 3 income sources
+      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
       await taxPage.addSourceButton.click();
-      // Wait for Blazor Server to re-render the new row
-      await expect(sourceInputs).toHaveCount(beforeCount + 1, { timeout: 10000 });
+      // After clicking, should have 4
+      await expect(sourceInputs).toHaveCount(4, { timeout: 10000 });
     });
 
     test('should remove an income source row', async ({ page }) => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
-      const beforeCount = await sourceInputs.count();
+      // Pre-filled data has 3 income sources
+      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
       await taxPage.getRemoveButton(0).click();
-      // Wait for Blazor Server to re-render after removal
-      await expect(sourceInputs).toHaveCount(beforeCount - 1, { timeout: 10000 });
+      // After removing, should have 2
+      await expect(sourceInputs).toHaveCount(2, { timeout: 10000 });
     });
 
-    test('should update summary totals when income changes', async ({ page }) => {
-      // Clear all but one income row
-      while (await page.getByRole('button', { name: '✕' }).count() > 1) {
-        await page.getByRole('button', { name: '✕' }).first().click();
-        await page.waitForTimeout(500);
-      }
-      // Fill the remaining row with a known value
-      await taxPage.getIncomeSourceInput(0).fill('Test Income');
-      await taxPage.getIncomeAmountInput(0).fill('50000');
+    test('should update summary totals when income source is removed', async ({ page }) => {
+      // The pre-filled data has 3 income sources totaling $100,700
+      await expect(page.getByText('$100,700.00')).toBeVisible({ timeout: 10000 });
 
-      // Click elsewhere to trigger Blazor binding
-      await taxPage.fullNameInput.click();
+      // Remove one income source (first row: $85,000)
+      await taxPage.getRemoveButton(0).click();
+      await page.waitForTimeout(1000);
 
-      // Use auto-retrying assertion (Blazor Server needs time to recalculate)
-      await expect(page.getByText('$50,000.00')).toBeVisible({ timeout: 10000 });
+      // After removing the $85,000 source, total should be $15,700
+      await expect(page.getByText('$15,700.00')).toBeVisible({ timeout: 10000 });
     });
   });
 

@@ -1,21 +1,13 @@
 version: v0.1
-testId: itext-pdf-e2e-load
+testId: itext-pdf-playwright-tests
 testType: PLAYWRIGHT
-displayName: iText PDF Service — Playwright E2E Load Test
-description: Run Playwright E2E tests at scale via Azure Load Testing
+displayName: iText PDF Service — Playwright E2E Tests (Cloud)
+description: Run Playwright E2E tests in Azure Playwright Testing workspace
 testPlan: e2e/
 engineInstances: 1
-
-autoStop:
-  errorPercentage: 80
-  timeWindow: 60
 
 env:
   - name: BASE_URL
     value: https://itext-pdf-service-demo.azurewebsites.net
   - name: CI
     value: "true"
-
-failureCriteria:
-  - avg(response_time_ms) > 5000
-  - percentage(error) > 10
