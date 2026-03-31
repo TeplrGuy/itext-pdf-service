@@ -1,0 +1,231 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "ITextPdfService/1.0.0": {
+        "dependencies": {
+          "itext": "9.5.0",
+          "itext.bouncy-castle-adapter": "9.5.0",
+          "itext.bouncy-castle-fips-adapter": "9.5.0",
+          "itext.licensing.base": "4.2.5"
+        },
+        "runtime": {
+          "ITextPdfService.dll": {}
+        }
+      },
+      "BouncyCastle.Cryptography/2.6.2": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.6.2.46322"
+          }
+        }
+      },
+      "itext/9.5.0": {
+        "dependencies": {
+          "Microsoft.DotNet.PlatformAbstractions": "1.1.0",
+          "Microsoft.Extensions.DependencyModel": "1.1.0",
+          "itext.commons": "9.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.barcodes.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.bouncy-castle-connector.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.forms.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.io.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.kernel.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.layout.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.pdfa.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.pdfua.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.sign.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.styledxmlparser.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          },
+          "lib/netstandard2.0/itext.svg.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          }
+        }
+      },
+      "itext.bouncy-castle-adapter/9.5.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "itext.commons": "9.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          }
+        }
+      },
+      "itext.bouncy-castle-fips-adapter/9.5.0": {
+        "dependencies": {
+          "itext.commons": "9.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/bc-fips-1.0.2.dll": {
+            "assemblyVersion": "1.0.2.0",
+            "fileVersion": "1.0.2.0"
+          },
+          "lib/netstandard2.0/bcpkix-fips-1.0.2.dll": {
+            "assemblyVersion": "1.0.2.0",
+            "fileVersion": "1.0.23058.1"
+          },
+          "lib/netstandard2.0/itext.bouncy-castle-fips-adapter.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          }
+        }
+      },
+      "itext.commons/9.5.0": {
+        "runtime": {
+          "lib/netstandard2.0/itext.commons.dll": {
+            "assemblyVersion": "9.5.0.0",
+            "fileVersion": "9.5.0.0"
+          }
+        }
+      },
+      "itext.licensing.base/4.2.5": {
+        "dependencies": {
+          "itext.commons": "9.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.licensing.base.dll": {
+            "assemblyVersion": "4.2.5.0",
+            "fileVersion": "4.2.5.0"
+          }
+        }
+      },
+      "Microsoft.DotNet.PlatformAbstractions/1.1.0": {
+        "runtime": {
+          "lib/netstandard1.3/Microsoft.DotNet.PlatformAbstractions.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyModel/1.1.0": {
+        "dependencies": {
+          "Microsoft.DotNet.PlatformAbstractions": "1.1.0",
+          "Newtonsoft.Json": "9.0.1"
+        },
+        "runtime": {
+          "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
+      "Newtonsoft.Json/9.0.1": {
+        "runtime": {
+          "lib/netstandard1.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.1.19813"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ITextPdfService/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BouncyCastle.Cryptography/2.6.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w==",
+      "path": "bouncycastle.cryptography/2.6.2",
+      "hashPath": "bouncycastle.cryptography.2.6.2.nupkg.sha512"
+    },
+    "itext/9.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qN+CYYQCKnkEdUzmiDACNpfZGUEhsTMOUZ2YOYQ9NQL+Qi6EC+5kEF8utGKuwaMXQnvq8IeZVPczGd27k/TasQ==",
+      "path": "itext/9.5.0",
+      "hashPath": "itext.9.5.0.nupkg.sha512"
+    },
+    "itext.bouncy-castle-adapter/9.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NyttPZzpFS0iAVDo2GJHQ1tmYScqKozEmp9YRTUsxCEg/HIfqL6qBo9l/eaLYmPmjhR99AkZWL1S08OQ+6c2Bw==",
+      "path": "itext.bouncy-castle-adapter/9.5.0",
+      "hashPath": "itext.bouncy-castle-adapter.9.5.0.nupkg.sha512"
+    },
+    "itext.bouncy-castle-fips-adapter/9.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FDrpVYjJuxQg4lONM1NdqvQdf/bV0C+ZAYMO5UqmcvPgl7q3I26sVrV0xJM4UpXwq5EFE5KNGUA8Bu4P0/C1tA==",
+      "path": "itext.bouncy-castle-fips-adapter/9.5.0",
+      "hashPath": "itext.bouncy-castle-fips-adapter.9.5.0.nupkg.sha512"
+    },
+    "itext.commons/9.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3A7GknafwvGytOe4Jbba+7wYmhBaiZnaP+C8/Qw3sADzHElAjH3HZFRMF9u6Tt01LW7HdwCBTJb7V9ErFxSk8w==",
+      "path": "itext.commons/9.5.0",
+      "hashPath": "itext.commons.9.5.0.nupkg.sha512"
+    },
+    "itext.licensing.base/4.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-H5sHScnzq5cc1dJwnf290MRX1YulGxj8Utc1rX8OUuS7dIJ9lhZZeiOjt5989l4y10XqTdDc2o5dCxyJtXeQVQ==",
+      "path": "itext.licensing.base/4.2.5",
+      "hashPath": "itext.licensing.base.4.2.5.nupkg.sha512"
+    },
+    "Microsoft.DotNet.PlatformAbstractions/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Bl6KYfbFSIW3QIRHAp931iR5h01qHjKghdpAtncwbzNUs0+IUZ+XfwkIU0sQsR33ufGvi3u4dZMIYYFysjpHAA==",
+      "path": "microsoft.dotnet.platformabstractions/1.1.0",
+      "hashPath": "microsoft.dotnet.platformabstractions.1.1.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyModel/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TG7dJ8GY1Myz9lZ8DJL4i6D05ncJQBi5CjBMXMdJ4edKxaW+vP2DndDd1jJabdMdmVRdGrvybzqkB+A6Df7eDw==",
+      "path": "microsoft.extensions.dependencymodel/1.1.0",
+      "hashPath": "microsoft.extensions.dependencymodel.1.1.0.nupkg.sha512"
+    },
+    "Newtonsoft.Json/9.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-U82mHQSKaIk+lpSVCbWYKNavmNH1i5xrExDEquU1i6I5pV6UMOqRnJRSlKO3cMPfcpp0RgDY+8jUXHdQ4IfXvw==",
+      "path": "newtonsoft.json/9.0.1",
+      "hashPath": "newtonsoft.json.9.0.1.nupkg.sha512"
+    }
+  }
+}

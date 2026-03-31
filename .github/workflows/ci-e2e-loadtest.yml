@@ -1,0 +1,111 @@
+name: Build, E2E Test & Load Test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '20'
+  APP_URL: https://itext-pdf-service-demo.azurewebsites.net
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Unit Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+  e2e-tests:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Start application
+        run: |
+          dotnet run --project src/ITextPdfService &
+          echo "Waiting for app to start..."
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:5087 > /dev/null 2>&1; then
+              echo "App is ready!"
+              break
+            fi
+            sleep 2
+          done
+        env:
+          ASPNETCORE_URLS: http://localhost:5087
+
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: e2e
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:5087
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results
+          path: e2e/test-results/
+          retention-days: 14
+
+  load-test:
+    needs: e2e-tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run Azure Load Test
+        uses: azure/load-testing@v1
+        with:
+          loadTestConfigFile: azure-load-test.yml
+          loadTestResource: alt-itext-pdf-demo
+          resourceGroup: rg-itext-pdf-demo
+          env: |
+            [
+              { "name": "BASE_URL", "value": "${{ env.APP_URL }}" }
+            ]
