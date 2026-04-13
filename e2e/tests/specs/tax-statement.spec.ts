@@ -7,6 +7,8 @@ test.describe('Tax Statement Generator', () => {
   test.beforeEach(async ({ page }) => {
     taxPage = new TaxStatementPage(page);
     await taxPage.goto();
+    // Wait for Blazor Server circuit to be fully established
+    await expect(taxPage.generateButton).toBeEnabled({ timeout: 15000 });
   });
 
   test.describe('Page Load', () => {
@@ -38,39 +40,34 @@ test.describe('Tax Statement Generator', () => {
 
   test.describe('Form Interaction', () => {
     test('should allow editing taxpayer name', async ({ page }) => {
-      await taxPage.fullNameInput.click();
-      await taxPage.fullNameInput.press('Control+a');
-      await taxPage.fullNameInput.pressSequentially('Test User', { delay: 30 });
+      await taxPage.fullNameInput.fill('Test User');
       await taxPage.ssnInput.click(); // blur to commit
-      await expect(taxPage.fullNameInput).toHaveValue('Test User', { timeout: 10000 });
+      await expect(taxPage.fullNameInput).toHaveValue('Test User');
     });
 
     test('should allow editing tax year', async ({ page }) => {
       const yearInput = page.locator('input[name="statement.TaxpayerInfo.TaxYear"]');
-      await yearInput.click();
-      await yearInput.press('Control+a');
-      await yearInput.type('2024');
+      await yearInput.fill('2024');
       await taxPage.fullNameInput.click(); // blur to commit
-      await page.waitForTimeout(300);
       await expect(yearInput).toHaveValue('2024');
     });
 
     test('should add a new income source row', async ({ page }) => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
       // Pre-filled data has 3 income sources
-      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
+      await expect(sourceInputs).toHaveCount(3, { timeout: 15000 });
       await taxPage.addSourceButton.click();
       // After clicking, should have 4
-      await expect(sourceInputs).toHaveCount(4, { timeout: 10000 });
+      await expect(sourceInputs).toHaveCount(4, { timeout: 15000 });
     });
 
     test('should remove an income source row', async ({ page }) => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
       // Pre-filled data has 3 income sources
-      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
+      await expect(sourceInputs).toHaveCount(3, { timeout: 15000 });
       await taxPage.getRemoveButton(0).click();
       // After removing, should have 2
-      await expect(sourceInputs).toHaveCount(2, { timeout: 10000 });
+      await expect(sourceInputs).toHaveCount(2, { timeout: 15000 });
     });
 
     test('should update summary totals when income source is removed', async ({ page }) => {
@@ -91,6 +88,7 @@ test.describe('Tax Statement Generator', () => {
 
   test.describe('PDF Generation', () => {
     test('should generate and download a PDF', async () => {
+      test.slow(); // PDF generation + download on F1 tier needs extra time
       const download = await taxPage.generatePdf();
       const filename = download.suggestedFilename();
       expect(filename).toContain('TaxStatement');
@@ -98,11 +96,13 @@ test.describe('Tax Statement Generator', () => {
     });
 
     test('should show success message after generation', async () => {
+      test.slow();
       await taxPage.generatePdf();
       await taxPage.expectSuccess();
     });
 
     test('should include taxpayer name in PDF filename', async ({ page }) => {
+      test.slow();
       await taxPage.fullNameInput.fill('John Doe');
       // Blur to commit Blazor binding, then wait for re-render
       await taxPage.ssnInput.click();
@@ -116,14 +116,15 @@ test.describe('Tax Statement Generator', () => {
 
   test.describe('Full User Flow', () => {
     test('should complete the full workflow: fill form, add source, generate PDF', async ({ page }) => {
+      test.slow(); // Full workflow with PDF generation needs extra time
       // Step 1: Edit taxpayer name
       await taxPage.fullNameInput.fill('E2E Test User');
       await taxPage.ssnInput.click(); // blur name
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
 
       // Step 2: Add an income source
       await taxPage.addSourceButton.click();
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
 
       // Step 3: Generate PDF
       const download = await taxPage.generatePdf();
