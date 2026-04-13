@@ -1,41 +1,15 @@
-/**
- * Playwright Service Configuration
- * 
- * This config extends the base playwright.config.ts and connects to
- * Azure Playwright Workspaces for cloud-hosted browser execution.
- * 
- * Usage:
- *   npx playwright test --config=playwright.service.config.ts
- *   npx playwright test --config=playwright.service.config.ts --workers=20
- * 
- * Requires:
- *   PLAYWRIGHT_SERVICE_URL environment variable set to your workspace endpoint
- *   Azure CLI login (az login) for authentication
- */
-import { defineConfig, type PlaywrightTestConfig } from '@playwright/test';
-import { getConnectOptions, ServiceOS } from '@azure/playwright';
-import { AzureCliCredential } from '@azure/identity';
-import baseConfig from './playwright.config';
-import dotenv from 'dotenv';
+import { defineConfig } from '@playwright/test';
+import { createAzurePlaywrightConfig, ServiceOS } from '@azure/playwright';
+import { DefaultAzureCredential } from '@azure/identity';
+import config from './playwright.config';
 
-dotenv.config();
-
-async function createConfig(): Promise<PlaywrightTestConfig> {
-  const connectOptions = await getConnectOptions({
-    credential: new AzureCliCredential(),
+/* Learn more about service configuration at https://aka.ms/pww/docs/config */
+export default defineConfig(
+  config,
+  createAzurePlaywrightConfig(config, {
+    exposeNetwork: '<loopback>',
+    connectTimeout: 3 * 60 * 1000,
     os: ServiceOS.LINUX,
-  });
-
-  return defineConfig(baseConfig, {
-    workers: 20,
-    use: {
-      ...baseConfig.use,
-      connectOptions,
-      trace: 'on-first-retry',
-      screenshot: 'on',
-      video: 'retain-on-failure',
-    },
-  });
-}
-
-export default createConfig();
+    credential: new DefaultAzureCredential(),
+  }),
+);
