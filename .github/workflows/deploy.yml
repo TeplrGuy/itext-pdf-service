@@ -1,0 +1,93 @@
+name: Deploy Infrastructure & App
+on:
+  push:
+    branches: [main, playwright-testing]
+    paths:
+      - 'infrastructure/**'
+      - 'src/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: true
+  ARM_USE_AZUREAD: true
+
+jobs:
+  # ── Stage 1: Terraform Plan & Apply ─────────────────────────────────
+  infrastructure:
+    name: Terraform Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      app_service_name: ${{ steps.tf-output.outputs.app_service_name }}
+      app_url: ${{ steps.tf-output.outputs.app_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infrastructure/terraform
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure/terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Outputs
+        id: tf-output
+        working-directory: infrastructure/terraform
+        run: |
+          echo "app_service_name=$(terraform output -raw app_service_name)" >> $GITHUB_OUTPUT
+          echo "app_url=$(terraform output -raw app_service_url)" >> $GITHUB_OUTPUT
+
+  # ── Stage 2: Build & Deploy App ─────────────────────────────────────
+  deploy-app:
+    name: Deploy to App Service
+    needs: infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build & Publish
+        run: dotnet publish src/ITextPdfService/ITextPdfService.csproj --configuration Release --output ./publish
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ needs.infrastructure.outputs.app_service_name }}
+          package: ./publish
