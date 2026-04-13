@@ -12,4 +12,8 @@ export default defineConfig(
     os: ServiceOS.LINUX,
     credential: new DefaultAzureCredential(),
   }),
+  {
+    timeout: 60_000,
+    expect: { timeout: 15_000 },
+  },
 );

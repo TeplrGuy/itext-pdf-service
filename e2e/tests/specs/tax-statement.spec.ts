@@ -81,11 +81,11 @@ test.describe('Tax Statement Generator', () => {
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
       await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
 
-      // Remove one income source (first row)
+      // Remove one income source (first row) — wait for Blazor re-render
       await taxPage.getRemoveButton(0).click();
 
-      // After removing, should have 2 sources
-      await expect(sourceInputs).toHaveCount(2, { timeout: 10000 });
+      // After removing, should have 2 sources (allow extra time for remote re-render)
+      await expect(sourceInputs).toHaveCount(2, { timeout: 15000 });
     });
   });
 
