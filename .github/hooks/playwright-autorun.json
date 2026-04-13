@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": ".github/hooks/scripts/playwright-autorun.sh",
+        "windows": "powershell -ExecutionPolicy Bypass -File .github\\hooks\\scripts\\playwright-autorun.ps1",
+        "timeout": 60
+      }
+    ]
+  }
+}

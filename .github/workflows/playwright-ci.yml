@@ -1,7 +1,7 @@
-name: Build, E2E Test & Load Test
+name: Playwright CI & Azure Workspace
 on:
   push:
-    branches: [main]
+    branches: [main, playwright-testing]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -12,7 +12,8 @@ env:
   APP_URL: https://itext-pdf-service-demo.azurewebsites.net
 
 jobs:
-  build-and-test:
+  # ── Stage 1: Build & Unit Test ──────────────────────────────────────
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,8 +29,9 @@ jobs:
       - name: Unit Tests
         run: dotnet test --configuration Release --no-build --verbosity normal
 
+  # ── Stage 2: Playwright E2E (Local) ─────────────────────────────────
   e2e-tests:
-    needs: build-and-test
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -63,9 +65,9 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
-      - name: Run E2E tests
+      - name: Run Playwright tests
         working-directory: e2e
-        run: npx playwright test
+        run: npx playwright test --forbid-only
         env:
           BASE_URL: http://localhost:5087
           CI: true
@@ -86,13 +88,13 @@ jobs:
           path: e2e/test-results/
           retention-days: 14
 
-  playwright-cloud:
-    name: Playwright Workspace (Cloud)
+  # ── Stage 3: Azure Playwright Workspace (Cloud) ─────────────────────
+  playwright-workspace:
+    name: Playwright Workspace (Azure)
     needs: e2e-tests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: true  # Cloud tests are optional — requires Playwright Workspace setup
     permissions:
       id-token: write
       contents: read
@@ -118,7 +120,7 @@ jobs:
         id: az-token
         run: echo "token=$(az account get-access-token --resource https://management.azure.com --query accessToken -o tsv)" >> $GITHUB_OUTPUT
 
-      - name: Run Playwright tests in Azure Playwright Workspace
+      - name: Run Playwright in Azure Workspace
         working-directory: e2e
         run: npx playwright test --config=playwright.service.config.ts --workers=20
         env:

@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": ".github/hooks/scripts/playwright-coverage.sh",
+        "windows": "powershell -ExecutionPolicy Bypass -File .github\\hooks\\scripts\\playwright-coverage.ps1",
+        "timeout": 15
+      }
+    ]
+  }
+}
