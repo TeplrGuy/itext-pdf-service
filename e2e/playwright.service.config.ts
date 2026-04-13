@@ -12,25 +12,30 @@
  *   PLAYWRIGHT_SERVICE_URL environment variable set to your workspace endpoint
  *   Azure CLI login (az login) for authentication
  */
-import { defineConfig } from '@playwright/test';
-import { createAzurePlaywrightConfig, ServiceAuth } from '@azure/playwright';
+import { defineConfig, type PlaywrightTestConfig } from '@playwright/test';
+import { getConnectOptions } from '@azure/playwright';
+import { AzureCliCredential } from '@azure/identity';
 import baseConfig from './playwright.config';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export default defineConfig(
-  baseConfig,
-  createAzurePlaywrightConfig({
-    serviceAuthType: ServiceAuth.ACCESS_TOKEN,
-  }),
-  {
+async function createConfig(): Promise<PlaywrightTestConfig> {
+  const connectOptions = await getConnectOptions({
+    credential: new AzureCliCredential(),
+    os: 'windows' as any,
+  });
+
+  return defineConfig(baseConfig, {
     workers: 20,
     use: {
       ...baseConfig.use,
+      connectOptions,
       trace: 'on-first-retry',
       screenshot: 'on',
       video: 'retain-on-failure',
     },
-  }
-);
+  });
+}
+
+export default createConfig();
