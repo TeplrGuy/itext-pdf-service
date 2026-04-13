@@ -23,7 +23,7 @@ dotenv.config();
 async function createConfig(): Promise<PlaywrightTestConfig> {
   const connectOptions = await getConnectOptions({
     credential: new AzureCliCredential(),
-    os: 'windows' as any,
+    os: 'linux' as any,
   });
 
   return defineConfig(baseConfig, {

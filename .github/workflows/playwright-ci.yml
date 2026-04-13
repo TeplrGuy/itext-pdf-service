@@ -125,11 +125,7 @@ jobs:
         run: npx playwright test --config=playwright.service.config.ts --workers=20
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
-          PLAYWRIGHT_SERVICE_ACCESS_TOKEN: ${{ steps.az-token.outputs.token }}
-          BASE_URL: ${{ env.APP_URL }}
           CI: true
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Upload cloud test report
         uses: actions/upload-artifact@v4
