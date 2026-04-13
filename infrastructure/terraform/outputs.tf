@@ -9,8 +9,8 @@ output "app_service_name" {
 }
 
 output "playwright_service_url" {
-  description = "Playwright Testing workspace dataplane URL"
-  value       = azapi_resource.playwright_workspace.output.properties.dataplaneUri
+  description = "Playwright Testing workspace WebSocket URL for browser connections"
+  value       = "${replace(azapi_resource.playwright_workspace.output.properties.dataplaneUri, "https://", "wss://")}/browsers"
 }
 
 output "resource_group_name" {

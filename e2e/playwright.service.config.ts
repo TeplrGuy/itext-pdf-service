@@ -13,7 +13,7 @@
  *   Azure CLI login (az login) for authentication
  */
 import { defineConfig, type PlaywrightTestConfig } from '@playwright/test';
-import { getConnectOptions } from '@azure/playwright';
+import { getConnectOptions, ServiceOS } from '@azure/playwright';
 import { AzureCliCredential } from '@azure/identity';
 import baseConfig from './playwright.config';
 import dotenv from 'dotenv';
@@ -23,7 +23,7 @@ dotenv.config();
 async function createConfig(): Promise<PlaywrightTestConfig> {
   const connectOptions = await getConnectOptions({
     credential: new AzureCliCredential(),
-    os: 'linux' as any,
+    os: ServiceOS.LINUX,
   });
 
   return defineConfig(baseConfig, {
