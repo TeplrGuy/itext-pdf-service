@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@azure/identity": "^4.13.1",
-    "@azure/playwright": "^1.1.3",
+    "@azure/playwright": "^1.1.4",
     "@playwright/test": "^1.52.0",
     "dotenv": "^17.3.1"
   }

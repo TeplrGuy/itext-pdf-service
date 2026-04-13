@@ -28,6 +28,12 @@ variable "playwright_workspace_name" {
   default     = "pwitextpdfdemo"
 }
 
+variable "playwright_storage_name" {
+  description = "Name of the storage account for Playwright Workspace reporting"
+  type        = string
+  default     = "stpwitextpdfreport"
+}
+
 variable "dotnet_version" {
   description = ".NET version for the App Service"
   type        = string
