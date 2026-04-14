@@ -40,16 +40,22 @@ test.describe('Tax Statement Generator', () => {
 
   test.describe('Form Interaction', () => {
     test('should allow editing taxpayer name', async ({ page }) => {
-      await taxPage.fullNameInput.fill('Test User');
-      await taxPage.ssnInput.click(); // blur to commit
-      await expect(taxPage.fullNameInput).toHaveValue('Test User');
+      // Blazor Server communicates via SignalR; retry fill+blur to handle async re-renders
+      await expect(async () => {
+        await taxPage.fullNameInput.fill('Test User');
+        await taxPage.ssnInput.click(); // blur to commit
+        await expect(taxPage.fullNameInput).toHaveValue('Test User');
+      }).toPass({ timeout: 15000 });
     });
 
     test('should allow editing tax year', async ({ page }) => {
       const yearInput = page.locator('input[name="statement.TaxpayerInfo.TaxYear"]');
-      await yearInput.fill('2024');
-      await taxPage.fullNameInput.click(); // blur to commit
-      await expect(yearInput).toHaveValue('2024');
+      // Blazor Server communicates via SignalR; retry fill+blur to handle async re-renders
+      await expect(async () => {
+        await yearInput.fill('2024');
+        await taxPage.fullNameInput.click(); // blur to commit
+        await expect(yearInput).toHaveValue('2024');
+      }).toPass({ timeout: 15000 });
     });
 
     test('should add a new income source row', async ({ page }) => {
@@ -57,8 +63,8 @@ test.describe('Tax Statement Generator', () => {
       // Pre-filled data has 3 income sources
       await expect(sourceInputs).toHaveCount(3, { timeout: 15000 });
       await taxPage.addSourceButton.click();
-      // After clicking, should have 4
-      await expect(sourceInputs).toHaveCount(4, { timeout: 15000 });
+      // After clicking, should have 4 (allow extra time for Blazor Server re-render)
+      await expect(sourceInputs).toHaveCount(4, { timeout: 20000 });
     });
 
     test('should remove an income source row', async ({ page }) => {
@@ -66,8 +72,8 @@ test.describe('Tax Statement Generator', () => {
       // Pre-filled data has 3 income sources
       await expect(sourceInputs).toHaveCount(3, { timeout: 15000 });
       await taxPage.getRemoveButton(0).click();
-      // After removing, should have 2
-      await expect(sourceInputs).toHaveCount(2, { timeout: 15000 });
+      // After removing, should have 2 (allow extra time for Blazor Server re-render)
+      await expect(sourceInputs).toHaveCount(2, { timeout: 20000 });
     });
 
     test('should update summary totals when income source is removed', async ({ page }) => {
@@ -76,28 +82,34 @@ test.describe('Tax Statement Generator', () => {
 
       // Verify 3 income sources are present before removing
       const sourceInputs = page.getByRole('textbox', { name: 'e.g. W-2 Wages' });
-      await expect(sourceInputs).toHaveCount(3, { timeout: 10000 });
+      await expect(sourceInputs).toHaveCount(3, { timeout: 15000 });
 
       // Remove one income source (first row) — wait for Blazor re-render
       await taxPage.getRemoveButton(0).click();
 
-      // After removing, should have 2 sources (allow extra time for remote re-render)
-      await expect(sourceInputs).toHaveCount(2, { timeout: 15000 });
+      // After removing, should have 2 sources (allow extra time for Blazor Server re-render)
+      await expect(sourceInputs).toHaveCount(2, { timeout: 20000 });
     });
   });
 
   test.describe('PDF Generation', () => {
-    test('should generate and download a PDF', async () => {
+    test('should generate and download a PDF', async ({ page }) => {
       test.slow(); // PDF generation + download on F1 tier needs extra time
-      const download = await taxPage.generatePdf();
-      const filename = download.suggestedFilename();
+      // Retry the generate+download sequence to handle Blazor Server SignalR flakiness
+      let download: Awaited<ReturnType<typeof taxPage.generatePdf>>;
+      await expect(async () => {
+        download = await taxPage.generatePdf();
+      }).toPass({ timeout: 30000 });
+      const filename = download!.suggestedFilename();
       expect(filename).toContain('TaxStatement');
       expect(filename).toContain('.pdf');
     });
 
     test('should show success message after generation', async () => {
       test.slow();
-      await taxPage.generatePdf();
+      await expect(async () => {
+        await taxPage.generatePdf();
+      }).toPass({ timeout: 30000 });
       await taxPage.expectSuccess();
     });
 

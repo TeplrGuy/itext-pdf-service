@@ -92,8 +92,8 @@ export class TaxStatementPage {
     await this.deductionsInput.fill(amount);
   }
 
-  async generatePdf() {
-    const downloadPromise = this.page.waitForEvent('download');
+  async generatePdf(timeout = 15000) {
+    const downloadPromise = this.page.waitForEvent('download', { timeout });
     await this.generateButton.click();
     return downloadPromise;
   }
