@@ -17,6 +17,7 @@ export default defineConfig(
     expect: { timeout: 15_000 },
     reporter: [
       ['html', { open: 'never' }],
+      ['@azure/playwright/reporter'],
     ],
   },
 );

@@ -19,7 +19,7 @@ variable "app_service_plan_name" {
 variable "app_service_name" {
   description = "Name of the App Service"
   type        = string
-  default     = "itext-pdf-service-demo"
+  default     = "itext-pdf-service-demo2"
 }
 
 variable "playwright_workspace_name" {
@@ -31,7 +31,7 @@ variable "playwright_workspace_name" {
 variable "playwright_storage_name" {
   description = "Name of the storage account for Playwright Workspace reporting"
   type        = string
-  default     = "stpwitextpdfreport"
+  default     = "stpwitextpdfreport2"
 }
 
 variable "dotnet_version" {
@@ -43,5 +43,5 @@ variable "dotnet_version" {
 variable "github_actions_sp_object_id" {
   description = "Object ID of the GitHub Actions service principal (OIDC)"
   type        = string
-  default     = "0766e7c6-0c6c-475f-9bb0-227b979df260"
+  default     = "5cc500cf-b86a-4d8a-85f4-ee61225ddf21"
 }

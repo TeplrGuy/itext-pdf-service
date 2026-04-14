@@ -9,7 +9,7 @@ on:
 env:
   DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20'
-  APP_URL: https://itext-pdf-service-demo.azurewebsites.net
+  APP_URL: https://itext-pdf-service-demo2.azurewebsites.net
 
 jobs:
   # ── Stage 1: Build & Unit Test ──────────────────────────────────────

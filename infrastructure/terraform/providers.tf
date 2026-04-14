@@ -14,7 +14,7 @@ terraform {
 
   backend "azurerm" {
     resource_group_name  = "rg-itext-pdf-demo"
-    storage_account_name = "stitextpdfdemotfstate"
+    storage_account_name = "stitextpdftfstate2"
     container_name       = "tfstate"
     key                  = "itext-pdf-service.tfstate"
     use_oidc             = true
