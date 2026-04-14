@@ -132,6 +132,16 @@ resource "azurerm_role_assignment" "user_playwright" {
 }
 
 # ---------------------------------------------------------------------------
+# RBAC: GitHub Actions SP → Playwright Workspace Contributor
+# ---------------------------------------------------------------------------
+resource "azurerm_role_assignment" "github_sp_playwright" {
+  scope                = azapi_resource.playwright_workspace.id
+  role_definition_name = "Playwright Workspace Contributor"
+  principal_id         = var.github_actions_sp_object_id
+  principal_type       = "ServicePrincipal"
+}
+
+# ---------------------------------------------------------------------------
 # Data source: current authenticated user
 # ---------------------------------------------------------------------------
 data "azurerm_client_config" "current" {}
