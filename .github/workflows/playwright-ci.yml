@@ -88,10 +88,43 @@ jobs:
           path: e2e/test-results/
           retention-days: 14
 
-  # ── Stage 3: Azure Playwright Workspace (Cloud) ─────────────────────
+  # ── Stage 3: Deploy to Azure App Service ─────────────────────────────
+  deploy:
+    name: Deploy to Azure
+    needs: e2e-tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/playwright-testing'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish application
+        run: dotnet publish src/ITextPdfService/ITextPdfService.csproj --configuration Release --output ./publish
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: itext-pdf-service-demo2
+          package: ./publish
+
+  # ── Stage 4: Azure Playwright Workspace (Cloud) ─────────────────────
   playwright-workspace:
     name: Playwright Workspace (Azure)
-    needs: e2e-tests
+    needs: deploy
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/playwright-testing'
     runs-on: ubuntu-latest
     timeout-minutes: 30
