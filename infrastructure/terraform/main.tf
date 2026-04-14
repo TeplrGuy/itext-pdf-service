@@ -69,19 +69,21 @@ resource "azapi_resource" "playwright_workspace" {
 # Storage Account for Playwright Workspace Reporting
 # ---------------------------------------------------------------------------
 resource "azurerm_storage_account" "playwright_reporting" {
-  name                     = var.playwright_storage_name
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2"
+  name                            = var.playwright_storage_name
+  resource_group_name             = azurerm_resource_group.main.name
+  location                        = azurerm_resource_group.main.location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
   shared_access_key_enabled       = false
+  public_network_access_enabled   = true
+  default_to_oauth_authentication = true
 
   blob_properties {
     cors_rule {
       allowed_origins    = ["https://trace.playwright.dev"]
-      allowed_methods    = ["GET", "OPTIONS"]
+      allowed_methods    = ["GET", "HEAD", "OPTIONS"]
       allowed_headers    = ["*"]
       exposed_headers    = ["*"]
       max_age_in_seconds = 3600
@@ -98,3 +100,38 @@ resource "azurerm_role_assignment" "playwright_mi_storage" {
   principal_id         = azapi_resource.playwright_workspace.identity[0].principal_id
   principal_type       = "ServicePrincipal"
 }
+
+# ---------------------------------------------------------------------------
+# RBAC: GitHub Actions SP → Storage Blob Data Contributor on reporting storage
+# ---------------------------------------------------------------------------
+resource "azurerm_role_assignment" "github_sp_storage" {
+  scope                = azurerm_storage_account.playwright_reporting.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = var.github_actions_sp_object_id
+  principal_type       = "ServicePrincipal"
+}
+
+# ---------------------------------------------------------------------------
+# RBAC: Current user → Storage Blob Data Contributor on reporting storage
+# ---------------------------------------------------------------------------
+resource "azurerm_role_assignment" "user_storage" {
+  scope                = azurerm_storage_account.playwright_reporting.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+  principal_type       = "User"
+}
+
+# ---------------------------------------------------------------------------
+# RBAC: Current user → Playwright Workspace Contributor
+# ---------------------------------------------------------------------------
+resource "azurerm_role_assignment" "user_playwright" {
+  scope                = azapi_resource.playwright_workspace.id
+  role_definition_name = "Playwright Workspace Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+  principal_type       = "User"
+}
+
+# ---------------------------------------------------------------------------
+# Data source: current authenticated user
+# ---------------------------------------------------------------------------
+data "azurerm_client_config" "current" {}

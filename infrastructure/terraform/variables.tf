@@ -39,3 +39,9 @@ variable "dotnet_version" {
   type        = string
   default     = "10.0"
 }
+
+variable "github_actions_sp_object_id" {
+  description = "Object ID of the GitHub Actions service principal (OIDC)"
+  type        = string
+  default     = "0766e7c6-0c6c-475f-9bb0-227b979df260"
+}
